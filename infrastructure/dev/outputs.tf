@@ -1,3 +1,3 @@
-output "hello_lambda_role_arn" {
-  value = "${module.iam.hello_lambda_arn}"
+output "lambda_hello_role_arn" {
+  value = "${module.iam.lambda_hello_arn}"
 }

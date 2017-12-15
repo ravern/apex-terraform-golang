@@ -1,5 +1,5 @@
 {
-  "name": "apex-terraform-golang",
+  "name": "apex_terraform_golang_dev",
   "runtime": "golang",
   "memory": 128,
   "timeout": 5
