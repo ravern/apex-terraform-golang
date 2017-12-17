@@ -5,13 +5,14 @@ provider "aws" {
 module "iam" {
   source = "../modules/iam"
 
-  name = "${var.name}"
+  name = "${var.name}_${var.apex_environment}"
 }
 
 module "apigw" {
   source = "../modules/apigw"
 
-  name = "${var.name}"
+  name = "${var.name}_${var.apex_environment}"
+  env  = "${var.apex_environment}"
 
   hello_arn = "${var.apex_function_hello}"
 }
