@@ -1,3 +1,4 @@
+variable "name" {}
 variable "aws_region" {}
 
-variable "name" {}
+variable "apex_function_hello" {}
