@@ -47,7 +47,7 @@ func handle(evt json.RawMessage, ctx *apex.Context) (interface{}, error) {
 	// Unmarshal the JSON
 	var e event
 	if err := json.Unmarshal(evt, &e); err != nil {
-		return newErrorResponse(errors.New("Integer 'value' is required as query")), nil
+		return newErrorResponse(errors.New("Couldn't unmarshal JSON")), nil
 	}
 
 	// Extract parameters
@@ -97,9 +97,18 @@ func put(c Counter) error {
 }
 
 func newErrorResponse(err error) map[string]interface{} {
+	body := map[string]interface{}{
+		"error": err.Error(),
+	}
+
+	json, err := json.Marshal(body)
+	if err != nil {
+		panic(err)
+	}
+
 	return map[string]interface{}{
 		"statusCode": 500,
-		"body":       `{"error":"` + err.Error() + `"}`,
+		"body":       string(json),
 	}
 }
 
