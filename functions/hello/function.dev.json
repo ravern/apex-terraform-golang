@@ -1,3 +1,6 @@
 {
-  "role": "arn:aws:iam::534919397947:role/apex_terraform_golang_dev_lambda_hello"
+  "role": "arn:aws:iam::534919397947:role/apex_terraform_golang_dev_lambda_hello",
+  "environment": {
+      "DYNAMODB_COUNTER": "apex_terraform_golang_dev_counter"
+  }
 }
