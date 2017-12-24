@@ -8,6 +8,29 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/aws/aws-sdk-go-v2"
+  packages = ["aws","aws/awserr","aws/defaults","aws/ec2metadata","aws/ec2rolecreds","aws/endpointcreds","aws/endpoints","aws/external","aws/signer/v4","aws/stscreds","internal/awsutil","internal/sdk","private/protocol","private/protocol/json/jsonutil","private/protocol/jsonrpc","private/protocol/query","private/protocol/query/queryutil","private/protocol/rest","private/protocol/xml/xmlutil","service/dynamodb","service/dynamodb/dynamodbattribute","service/sts"]
+  revision = "ac26486d921d336e20fec49e2afb348c801f0003"
+  version = "v2.0.0-preview.1"
+
+[[projects]]
+  name = "github.com/go-ini/ini"
+  packages = ["."]
+  revision = "32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a"
+  version = "v1.32.0"
+
+[[projects]]
+  name = "github.com/jmespath/go-jmespath"
+  packages = ["."]
+  revision = "0b12d6b5"
+
+[[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
@@ -28,6 +51,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d33f205363abb78558f0369cf6c569a17ac929ac78c403eb10e08369bcdc06b9"
+  inputs-digest = "a463c37e20e70576b391a1384ca180d9ccd023b54d5ad5defc4bbf700275bf9e"
   solver-name = "gps-cdcl"
   solver-version = 1

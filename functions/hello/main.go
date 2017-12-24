@@ -2,11 +2,16 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"os"
+	"strings"
 	"time"
 
 	apex "github.com/apex/go-apex"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/external"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/dynamodbattribute"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -21,10 +26,16 @@ type event struct {
 }
 
 // Counter model
-type counter struct {
-	UserIP    string
-	Timestamp time.Time
-	Value     int
+type Counter struct {
+	UserIP    string `json:"user_ip"`
+	Timestamp string `json:"timestamp"`
+	Value     int    `json:"value"`
+}
+
+// Response JSON
+type response struct {
+	StatusCode int       `json:"statusCode"`
+	Body       []Counter `json:"body"`
 }
 
 func main() {
@@ -36,21 +47,56 @@ func handle(evt json.RawMessage, ctx *apex.Context) (interface{}, error) {
 	// Unmarshal the JSON
 	var e event
 	if err := json.Unmarshal(evt, &e); err != nil {
-		return nil, errors.New("Integer 'value' is required.")
+		return nil, errors.New("Integer 'value' is required as query.")
 	}
 
 	// Extract parameters
-	_ = extract(e)
+	ctr := extract(e)
+
+	// Put it in DB
+	if err := put(ctr); err != nil {
+		return nil, err
+	}
 
 	// Construct response
-	return response(evt), nil
+	return respond(evt), nil
 }
 
-func extract(e event) counter {
-	return counter{}
+func extract(e event) Counter {
+	ip := strings.Split(e.Headers.XForwardedFor, ",")[0]
+	t := time.Now().UTC().Format(time.RFC3339)
+	val := e.QueryStringParameters.Value
+	return Counter{ip, t, val}
 }
 
-func response(evt json.RawMessage) map[string]interface{} {
+func put(c Counter) error {
+	cfg, err := external.LoadDefaultAWSConfig()
+	if err != nil {
+		return errors.Wrap(err, "Could not load AWS config.")
+	}
+
+	db := dynamodb.New(cfg)
+	table := os.Getenv("DYNAMODB_COUNTER")
+
+	item, err := dynamodbattribute.MarshalMap(c)
+	if err != nil {
+		panic(err)
+	}
+
+	in := &dynamodb.PutItemInput{
+		Item:      item,
+		TableName: aws.String(table),
+	}
+	req := db.PutItemRequest(in)
+	_, err = req.Send()
+	if err != nil {
+		return errors.Wrap(err, "DynamoDB ain't cooperating.")
+	}
+
+	return nil
+}
+
+func respond(evt json.RawMessage) map[string]interface{} {
 	return map[string]interface{}{
 		"statusCode": 200,
 		"body":       string(evt),
