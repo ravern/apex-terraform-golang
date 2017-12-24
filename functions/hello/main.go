@@ -47,7 +47,7 @@ func handle(evt json.RawMessage, ctx *apex.Context) (interface{}, error) {
 	// Unmarshal the JSON
 	var e event
 	if err := json.Unmarshal(evt, &e); err != nil {
-		return nil, errors.New("Integer 'value' is required as query.")
+		return newErrorResponse(errors.New("Integer 'value' is required as query")), nil
 	}
 
 	// Extract parameters
@@ -55,11 +55,11 @@ func handle(evt json.RawMessage, ctx *apex.Context) (interface{}, error) {
 
 	// Put it in DB
 	if err := put(ctr); err != nil {
-		return nil, err
+		return newErrorResponse(err), nil
 	}
 
 	// Construct response
-	return respond(evt), nil
+	return newSuccessResponse(), nil
 }
 
 func extract(e event) Counter {
@@ -72,7 +72,7 @@ func extract(e event) Counter {
 func put(c Counter) error {
 	cfg, err := external.LoadDefaultAWSConfig()
 	if err != nil {
-		return errors.Wrap(err, "Could not load AWS config.")
+		return errors.Wrap(err, "Could not load AWS config")
 	}
 
 	db := dynamodb.New(cfg)
@@ -90,15 +90,22 @@ func put(c Counter) error {
 	req := db.PutItemRequest(in)
 	_, err = req.Send()
 	if err != nil {
-		return errors.Wrap(err, "DynamoDB ain't cooperating.")
+		return errors.Wrap(err, "DynamoDB ain't cooperating")
 	}
 
 	return nil
 }
 
-func respond(evt json.RawMessage) map[string]interface{} {
+func newErrorResponse(err error) map[string]interface{} {
+	return map[string]interface{}{
+		"statusCode": 500,
+		"body":       `{"error":"` + err.Error() + `"}`,
+	}
+}
+
+func newSuccessResponse() map[string]interface{} {
 	return map[string]interface{}{
 		"statusCode": 200,
-		"body":       string(evt),
+		"body":       `{"hello":"world"}`,
 	}
 }
