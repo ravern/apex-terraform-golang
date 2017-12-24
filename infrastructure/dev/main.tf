@@ -16,3 +16,9 @@ module "apigw" {
 
   hello_arn = "${var.apex_function_hello}"
 }
+
+module "dynamodb" {
+  source = "../modules/dynamodb"
+
+  name = "${var.name}_${var.apex_environment}"
+}
