@@ -7,10 +7,12 @@ import (
 )
 
 func main() {
-	apex.HandleFunc(func(event json.RawMessage, ctx *apex.Context) (interface{}, error) {
-		return map[string]interface{}{
-			"statusCode": 200,
-			"body":       `{ "hello": "world" }`,
-		}, nil
-	})
+	apex.HandleFunc(handle)
+}
+
+func handle(evt json.RawMessage, ctx *apex.Context) (interface{}, error) {
+	return map[string]interface{}{
+		"statusCode": 200,
+		"body":       `{ "hello": "world" }`,
+	}, nil
 }
