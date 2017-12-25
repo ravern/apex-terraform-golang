@@ -27,9 +27,9 @@ type event struct {
 
 // Counter model
 type Counter struct {
-	UserIP    string `json:"user_ip"`
-	Timestamp string `json:"timestamp"`
-	Value     int    `json:"value"`
+	UserIP    string    `json:"user_ip" dynamodbav:"UserIP"`
+	Timestamp time.Time `json:"timestamp" dynamodbav:"Timestamp"`
+	Value     int       `json:"value" dynamodbav:"Value"`
 }
 
 // Response JSON
@@ -64,7 +64,7 @@ func handle(evt json.RawMessage, ctx *apex.Context) (interface{}, error) {
 
 func extract(e event) Counter {
 	ip := strings.Split(e.Headers.XForwardedFor, ",")[0]
-	t := time.Now().UTC().Format(time.RFC3339)
+	t := time.Now()
 	val := e.QueryStringParameters.Value
 	return Counter{ip, t, val}
 }
@@ -82,6 +82,8 @@ func put(c Counter) error {
 	if err != nil {
 		panic(err)
 	}
+
+	log.Info(item)
 
 	in := &dynamodb.PutItemInput{
 		Item:      item,

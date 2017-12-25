@@ -9,3 +9,8 @@ resource "aws_iam_role_policy_attachment" "lambda_hello_create_put_cw_logs" {
   role       = "${module.lambda_hello.name}"
   policy_arn = "${aws_iam_policy.create_put_cw_logs.arn}"
 }
+
+resource "aws_iam_role_policy_attachment" "lambda_hello_put_item_dynamodb" {
+  role       = "${module.lambda_hello.name}"
+  policy_arn = "${aws_iam_policy.put_item_dynamodb.arn}"
+}
