@@ -53,13 +53,27 @@ func handle(evt json.RawMessage, ctx *apex.Context) (interface{}, error) {
 	// Extract parameters
 	ctr := extract(e)
 
+	// Load AWS stuff
+	cfg, err := external.LoadDefaultAWSConfig()
+	if err != nil {
+		return newErrorResponse(errors.Wrap(err, "Could not load AWS config")), nil
+	}
+	db := dynamodb.New(cfg)
+	table := os.Getenv("DYNAMODB_COUNTER")
+
 	// Put it in DB
-	if err := put(ctr); err != nil {
+	if err := put(db, table, ctr); err != nil {
+		return newErrorResponse(err), nil
+	}
+
+	// Read all the counters
+	ctrs, err := read(db, table)
+	if err != nil {
 		return newErrorResponse(err), nil
 	}
 
 	// Construct response
-	return newSuccessResponse(), nil
+	return newSuccessResponse(ctrs), nil
 }
 
 func extract(e event) Counter {
@@ -69,21 +83,11 @@ func extract(e event) Counter {
 	return Counter{ip, t, val}
 }
 
-func put(c Counter) error {
-	cfg, err := external.LoadDefaultAWSConfig()
-	if err != nil {
-		return errors.Wrap(err, "Could not load AWS config")
-	}
-
-	db := dynamodb.New(cfg)
-	table := os.Getenv("DYNAMODB_COUNTER")
-
+func put(db *dynamodb.DynamoDB, table string, c Counter) error {
 	item, err := dynamodbattribute.MarshalMap(c)
 	if err != nil {
 		panic(err)
 	}
-
-	log.Info(item)
 
 	in := &dynamodb.PutItemInput{
 		Item:      item,
@@ -92,10 +96,28 @@ func put(c Counter) error {
 	req := db.PutItemRequest(in)
 	_, err = req.Send()
 	if err != nil {
-		return errors.Wrap(err, "DynamoDB ain't cooperating")
+		return errors.Wrap(err, "Couldn't put item")
 	}
 
 	return nil
+}
+
+func read(db *dynamodb.DynamoDB, table string) ([]Counter, error) {
+	in := &dynamodb.ScanInput{
+		TableName: aws.String(table),
+	}
+	req := db.ScanRequest(in)
+	out, err := req.Send()
+	if err != nil {
+		return nil, errors.Wrap(err, "Couldn't scan items")
+	}
+
+	ctrs := []Counter{}
+	if err := dynamodbattribute.UnmarshalListOfMaps(out.Items, &ctrs); err != nil {
+		panic(err)
+	}
+
+	return ctrs, nil
 }
 
 func newErrorResponse(err error) map[string]interface{} {
@@ -114,9 +136,19 @@ func newErrorResponse(err error) map[string]interface{} {
 	}
 }
 
-func newSuccessResponse() map[string]interface{} {
+func newSuccessResponse(ctrs []Counter) map[string]interface{} {
+	body := map[string]interface{}{
+		"message": "Success!",
+		"data":    ctrs,
+	}
+
+	json, err := json.Marshal(body)
+	if err != nil {
+		panic(err)
+	}
+
 	return map[string]interface{}{
 		"statusCode": 200,
-		"body":       `{"hello":"world"}`,
+		"body":       string(json),
 	}
 }
