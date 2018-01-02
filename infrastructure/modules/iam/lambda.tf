@@ -3,14 +3,9 @@ module "lambda_hello" {
 
   name      = "${var.name}_lambda_hello"
   principal = "lambda.amazonaws.com"
-}
 
-resource "aws_iam_role_policy_attachment" "lambda_hello_create_put_cw_logs" {
-  role       = "${module.lambda_hello.name}"
-  policy_arn = "${aws_iam_policy.create_put_cw_logs.arn}"
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_hello_scan_put_item_dynamodb" {
-  role       = "${module.lambda_hello.name}"
-  policy_arn = "${aws_iam_policy.scan_put_item_dynamodb.arn}"
+  policies = [
+    "${aws_iam_policy.create_put_cw_logs.arn}",
+    "${aws_iam_policy.scan_put_item_dynamodb.arn}",
+  ]
 }

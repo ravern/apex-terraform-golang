@@ -16,3 +16,9 @@ resource "aws_iam_role" "main" {
 }
 POLICY
 }
+
+resource "aws_iam_role_policy_attachment" "policy" {
+  count      = "${length(var.policies)}"
+  role       = "${var.name}"
+  policy_arn = "${element(var.policies, count.index)}"
+}
