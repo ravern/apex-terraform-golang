@@ -2,6 +2,6 @@ variable "name" {}
 
 variable "principal" {}
 
-variable "policies" {
+variable "policy_arns" {
   type = "list"
 }
