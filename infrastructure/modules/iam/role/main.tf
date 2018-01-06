@@ -18,7 +18,7 @@ POLICY
 }
 
 resource "aws_iam_role_policy_attachment" "policy" {
-  count      = "${length(var.policy_arns)}"
+  count      = "${var.policy_arns_count}"
   role       = "${var.name}"
   policy_arn = "${element(var.policy_arns, count.index)}"
 }

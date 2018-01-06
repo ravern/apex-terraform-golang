@@ -47,7 +47,7 @@ func handle(evt json.RawMessage, ctx *apex.Context) (interface{}, error) {
 	// Unmarshal the JSON
 	var e event
 	if err := json.Unmarshal(evt, &e); err != nil {
-		return newErrorResponse(errors.New("Couldn't unmarshal JSON")), nil
+		return newErrorResponse(errors.New("couldn't unmarshal JSON")), nil
 	}
 
 	// Extract parameters
@@ -56,7 +56,7 @@ func handle(evt json.RawMessage, ctx *apex.Context) (interface{}, error) {
 	// Load AWS stuff
 	cfg, err := external.LoadDefaultAWSConfig()
 	if err != nil {
-		return newErrorResponse(errors.Wrap(err, "Could not load AWS config")), nil
+		return newErrorResponse(errors.Wrap(err, "could not load AWS config")), nil
 	}
 	db := dynamodb.New(cfg)
 	table := os.Getenv("DYNAMODB_COUNTER")
@@ -96,7 +96,7 @@ func put(db *dynamodb.DynamoDB, table string, c Counter) error {
 	req := db.PutItemRequest(in)
 	_, err = req.Send()
 	if err != nil {
-		return errors.Wrap(err, "Couldn't put item")
+		return errors.Wrap(err, "couldn't put item")
 	}
 
 	return nil
@@ -109,7 +109,7 @@ func read(db *dynamodb.DynamoDB, table string) ([]Counter, error) {
 	req := db.ScanRequest(in)
 	out, err := req.Send()
 	if err != nil {
-		return nil, errors.Wrap(err, "Couldn't scan items")
+		return nil, errors.Wrap(err, "couldn't scan items")
 	}
 
 	ctrs := []Counter{}
