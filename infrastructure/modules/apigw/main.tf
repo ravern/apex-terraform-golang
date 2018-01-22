@@ -4,7 +4,7 @@ resource "aws_api_gateway_rest_api" "main" {
 
 resource "aws_api_gateway_deployment" "main" {
   depends_on = [
-    "module.get_hello_integration",
+    "module.hello",
   ]
 
   rest_api_id = "${aws_api_gateway_rest_api.main.id}"
