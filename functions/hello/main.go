@@ -6,13 +6,12 @@ import (
 	"strings"
 	"time"
 
-	apex "github.com/apex/go-apex"
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/dynamodbattribute"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // Event JSON
@@ -39,11 +38,10 @@ type response struct {
 }
 
 func main() {
-	log.SetOutput(os.Stderr)
-	apex.HandleFunc(handle)
+	lambda.Start(handle)
 }
 
-func handle(evt json.RawMessage, ctx *apex.Context) (interface{}, error) {
+func handle(evt json.RawMessage) (interface{}, error) {
 	// Unmarshal the JSON
 	var e event
 	if err := json.Unmarshal(evt, &e); err != nil {
